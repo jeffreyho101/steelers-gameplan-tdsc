@@ -1,5 +1,8 @@
 # Tartan Data Science Cup, Fall 2017 - Team McNuggets
 
+### Overview
+This repository consists of findings produced by Jeffrey Ho, Christian Manaog, and James Yan; we are all third-year Carnegie Mellon students. The files listed are all a part of our final submission to the Fall 2017 Tartan Data Science Cup. We presented to ESPN Senior Analyst Brian Burke and Carnegie Mellon faculty/PhD students. We earned 2nd place overall in the Tartan Data Science Cup.
+
 ### Objective
 The person who stole JuJu Smith-Schuster's bike also stole our gameplan for tonight. We're meeting at 5pm to create a new gameplan. Please bring us a document with anything you can find using NFL data that will help improve our chances of winning tonight vs. DET. We're short on time, so keep it under three pages of analysis
 
@@ -10,4 +13,4 @@ We have been tasked to create a new gameplan for tonight’s game against the De
 
 Note that our final report is a three-page condensed subset of our findings, which are all documented in the repository's R code (rmd file). 
 
-Additional note: During our final round presentation to ESPN Senior Analyst Brian Burke and Carnegie Mellon faculty/PhD students, I stated that Juju Smith-Schuster would have a "field day" under mostly single coverage against the Lions. Smith-Schuster had a career night, highlighted by a 97-yard touchdown reception. Not only is he the youngest player in the NFL right now, he also just broke the record for the Pittsburgh Steelers' longest recorded play by yardage. 
+Additional note: During our final round presentation, I stated that based on my analysis of Juju Smith-Schuster, he would have a "field day" under mostly single coverage against the Lions. Smith-Schuster did indeed have a career night, highlighted by a 97-yard touchdown reception. Not only is he the youngest current NFL player, but he also broke the record for the Pittsburgh Steelers' longest recorded touchdown play. 
