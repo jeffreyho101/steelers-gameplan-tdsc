@@ -1,10 +1,10 @@
 # Tartan Data Science Cup, Fall 2017 - Team McNuggets
 
 ### Overview
-This repository consists of findings produced by Jeffrey Ho, Christian Manaog, and James Yan; we are all third-year Carnegie Mellon students. The files listed are all a part of our final submission to the Fall 2017 Tartan Data Science Cup. We presented to ESPN Senior Analyst Brian Burke and Carnegie Mellon faculty/PhD students. We earned 2nd place overall in the Tartan Data Science Cup.
+This repository consists of findings produced by Jeffrey Ho, Christian Manaog, and James Yan; we are all third-year Carnegie Mellon students. The files listed are all a part of our final submission to the Fall 2017 Tartan Data Science Cup. We presented to ESPN Senior Analyst [Brian Burke](http://espnmediazone.com/us/bios/brian-burke/) and Carnegie Mellon faculty/PhD students. We earned 2nd place overall in the Tartan Data Science Cup.
 
 ### Objective
-The person who stole JuJu Smith-Schuster's bike also stole our gameplan for tonight. We're meeting at 5pm to create a new gameplan. Please bring us a document with anything you can find using NFL data that will help improve our chances of winning tonight vs. DET. We're short on time, so keep it under three pages of analysis
+The person who stole [JuJu Smith-Schuster](http://www.espn.com/nfl/player/_/id/3120348/juju-smith-schuster)'s bike also stole our gameplan for tonight. We're meeting at 5pm to create a new gameplan. Please bring us a document with anything you can find using NFL data that will help improve our chances of winning tonight vs. DET. We're short on time, so keep it under three pages of analysis
 
 Added half way through: We are considering incorporating receiver JuJu Smith-Schuster (abbreviated as J.Smith-Schuster) more into the offense. What is your recommendation? Please address this question in your gameplan for tonight, and still keep it under three pages of analysis
 
