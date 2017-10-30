@@ -1,0 +1,274 @@
+---
+title: 'TDSC 2017: Game Plan vs. DET'
+author: "Jeffrey Ho, Christian Manaog, James Yan (Team McNuggets)"
+date: "October 29, 2017"
+output:
+  html_document: default
+  pdf_document: default
+geometry: margin=1.1cm
+---
+
+## Problem Statement
+We have been tasked to create a new gameplan for tonight's game against the Detroit Lions. Below, we will break down effiective overall game strategies in order for the Steelers to come out on top. Offensively, we will detail strategies to break down the Lions' Defense, Le'Veon Bell's running habits, Clutch Time offense, and JuJu Smith-Schuster's potential impact on tonight's game. Defensively, we will emphasize the containment of Matthew Stafford and the Detroit offense's play selection on third down. Hopefully with the use of our gameplan strategies, the Steelers will come out on top tonight!
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+pbp.2017 = read.csv("~/Desktop/TDSC_Data/pbp_2017.csv")
+pbp.2016 = read.csv("~/Desktop/TDSC_Data/pbp_2016.csv")
+
+pbp.combined = rbind(pbp.2017, pbp.2016)
+pbp = subset(pbp.combined, pbp.combined$posteam == "PIT" | pbp.combined$DefensiveTeam == "PIT" | pbp.combined$posteam == "DET" | pbp.combined$DefensiveTeam == "DET" )
+
+library(tidyverse)
+library(lubridate)
+library(reshape2)
+library(gridExtra)
+source("https://raw.githubusercontent.com/mateyneykov/315_code_data/master/code/geom_mosaic.R")
+
+tdsc_theme <- theme(axis.text = element_text(size = 8, 
+                                                   color = "azure4"),
+                          axis.title = element_text(color = "dimgrey"),
+                          plot.title = element_text(size = 12),
+                          plot.caption = element_text(face = "italic",
+                                                      hjust = 0.5), 
+                          legend.title = element_text(size = 11),
+                          text = element_text(size = 10,
+                                              color = "black"),
+                          panel.background = element_rect(fill = "ghostwhite"))
+# Find Lions games
+nfl_lions <- pbp %>% filter(posteam == "DET")
+
+# Filter by Stafford's plays
+nfl_lions_stafford <- nfl_lions %>% filter(Passer == "M.Stafford",
+                                           Season == "2017")
+```
+
+## Breaking Down the Lions Defense
+
+To start, we want to analyze how successful teams have been running certain plays against Detroit's defense. The first figure below depicts the distribution of running plays and their success against the Lions since 2016, and the second figure does the same for passing plays. A negative run is classified as one that lost yardage, a short run gained between 0 and 5 yards, a medium run between 5 and 10, and a long run gained more than 10 yards.
+
+```{r, warning = FALSE, message = FALSE, echo = FALSE, fig.height=2.5}
+detDefData = subset(pbp, pbp$DefensiveTeam == "DET")
+detDefData = subset(detDefData, detDefData$PlayType %in% c("Run", "Pass"))
+
+detDefData = mutate(detDefData,
+                    runLength = ifelse(Yards.Gained < 0, "Negative", 
+                                  ifelse(Yards.Gained >= 0 & Yards.Gained < 5, "Short",
+                                  ifelse(Yards.Gained >= 5 & Yards.Gained < 10, "Medium", "Long"))))
+
+runPlays = subset(detDefData, PlayType == "Run")
+
+runsAgainstDET = ggplot(filter(runPlays, !is.na(RunLocation))) + geom_bar(aes(x = RunLocation, fill = runLength), position = "fill") + tdsc_theme + scale_fill_manual(values = c("royalblue", "peru", "firebrick", "wheat2")) + labs(title = "Runs Against DET Defense", x = "Location of Run", y = "Density", fill = "Length of Run")
+
+passPlays = subset(detDefData, PlayType == "Pass")
+
+passAgainstDET = ggplot(filter(passPlays, !is.na(PassLength))) + geom_bar(aes(x = PassLocation, fill = PassOutcome)) + facet_wrap(~PassLength) + scale_fill_manual(values = c("steelblue2", "firebrick")) + labs(title = "Passes Against DET Defense", fill = "Outcome of Pass", x = "Location of Pass", y = "Plays") 
+
+grid.arrange(runsAgainstDET, passAgainstDET, ncol=2)
+```
+\newline
+We can see that Detroit's defense seems to be more stout against runs towards the middle than compared to runs to each side, as they allow by far the least proportion of long runs against runs towards the middle. For tonight's game, the Steelers should favor runs to the left as they historically have the most potential for big plays and the least potential for negative yardage against Detroit.  Tonight, it would not hurt the Steelers to spread the ball around the field or attempt a few deep passes, as teams have had around a 50 percent completion rate for deep balls.
+
+
+## Le'Veon Bell - The Run Game
+
+Le'Veon Bell is used more than any other running back in the NFL. Given this, we want to find ways in which he can effectively run against an injury-riddled Lions front-7. Below, we have plotted a histogram of Le'Veon's runs by yards, where each bin consists of a two-yard interval and is colored by which position served as lead blocker. 
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.height=2, fig.width=5}
+# subsetting Le'Von Bell Rushing data
+pbp.leveon = subset(pbp, pbp$Rusher == "L.Bell")
+pbp.leveon = subset(pbp.leveon, pbp$posteam == "PIT")
+pbp.leveon = pbp.leveon[1:128,]
+
+pbp.leveon$RunGap = replace(pbp.leveon$RunGap, which(is.na(pbp.leveon$RunGap)), rep("guard", length(which(is.na(pbp.leveon$RunGap)))) )
+
+# histogram of Le'Veon's runs, colored by who his lead blocker was
+ggplot(pbp.leveon) + geom_histogram(aes(x = Yards.Gained, fill=RunGap),color="black", bins=10, binwidth = 2) +
+  labs(title = "Histogram of Yards Gained from Le'Veon Bell Runs", x="Yards Gained per Run", y="Frequency", fill="Lead Blocker") + tdsc_theme
+```
+
+Although Bell often runs up the middle, the gains he gets with a guard as the lead blocker center at around 3-4 yards per carry. However, we notice that a comparatively speaking, runs where a tackle is his lead blocker have yielded increased results in terms of big-yardage plays, as his only runs of more than 13 yards have occured when bouncing off tackles. With a Lions defense that lacks healthy, quality defensive ends, we may want to create mismatches with Leveon running through holes created by tackles.
+
+## Clutch Time
+In the event that we have a close game going into the final minutes of the half or fourth quarter, we want to determine what plays to run and who to feed the ball to. To do this, we first wanted to analyze how "clutch" a given Steelers position player is, so we plotted total win probability added from all carries/receptions against total EPA(expected points added) from targets weighted by each play’s WPA(total win probability added from all targets). It is likely that much of Brown's inherenly increased value in these statistics is due to increased opportunities for receivers to gain greater yardage than a runningback in a spread offense. In addition, in clutch situations, teams often value gaining chunk yardage in short amounts of time. If, on the other hand you're trying to run out the clock to prevent the other team from scoring or having another opportunity on offense, using a RB like Bell may be effective in such situations.
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.height=2, fig.width=7}
+team.rush = read.csv("~/Desktop/TDSC_Data/team_season_rushing_df.csv")
+team.rush = subset(team.rush, team.rush$Player_Name == "L.Bell")
+team.rec = read.csv("~/Desktop/TDSC_Data/team_season_receiving_df.csv")
+team.rec = subset(team.rec, team.rec$Team == "PIT")
+
+# ggplot(NULL, aes(x = Total_Clutch_EPA, y=Total_WPA)) + geom_point(data=team.rec, shape=3) + geom_point(data=team.rush) +
+#   labs(title="Total Win Probabilty from all Targets vs. Exp. Points Added per Clutch Play", 
+#        x="Total Clutch EPA", y="Total Win Prob. from All Targets",
+#        subtitle="dot = Le'Veon Bell; + = Antonio Brown")+ tdsc_theme
+```
+
+
+## What About JuJu?
+
+Given that the Steelers' offense throught the past two years have revolved heavily on Bell and Brown, we wonder what other options Mike Tomlin has for the Steelers' offense. Given the playing time fiasco regarding Matravis Bryant, Bryant has been benched and as a result, JuJu Smith-Schuster will likely be the Steelers' WR2 for now and the weeks ahead. He may only have 17 receptions on 26 targets on the year so far, but surely he's in for more targets tonight. Below are two bar graphs indicating frequency of passes to Smith-Schuster by down, colored by total yards gained if the pass was complete and length of intended pass if the pass was incomplete.
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.height=3, fig.width=8}
+pbp.juju = subset(pbp, pbp$Receiver == "J.Smith-Schuster")
+juju.modified = mutate(pbp.juju,
+                    airLength = ifelse(AirYards < 0, "Negative", 
+                                  ifelse(AirYards >= 0 & AirYards < 8, "Short",
+                                  ifelse(AirYards >= 8 & AirYards < 15, "Medium", "Long"))))
+juju.modified = mutate(juju.modified,
+                    recLength = ifelse(Yards.Gained < 0, "Negative", 
+                                  ifelse(Yards.Gained >= 0 & Yards.Gained < 8, "Short",
+                                  ifelse(Yards.Gained >= 8 & Yards.Gained < 15, "Medium", "Long"))))
+
+juju.complete = subset(juju.modified, juju.modified$PassOutcome == "Complete")
+juju.incomplete = subset(juju.modified, juju.modified$PassOutcome != "Complete")
+
+jujuc = ggplot(juju.complete) + geom_bar(aes(x=down, fill=recLength)) +
+  labs(title="Completions to J. Smith-Schuster", fill="Yards Gained", x="Down",
+       subtitle="Short=[0-8] Yds, Medium=[8-15] Yds, Long=[>15] Yds") + tdsc_theme
+  
+
+jujui = ggplot(juju.incomplete) + geom_bar(aes(x=down, fill=airLength)) +
+  labs(title="Incompletions to J.Smith-Schuster", fill="Length of Pass", x="Down",
+       subtitle="Short=[0-8] Yds, Medium=[8-15] Yds, Long=[>15] Yds") + tdsc_theme
+grid.arrange(jujuc, jujui,ncol=2)
+```
+
+From the above bar graphs, we can see that Smith-Schuster was often targeted with shorter/screen passes on earlier downs and longer passes on later downs. His overall completion rate is about 65%, but considering Ben Roethlisberger targets him on long (15+) yard passes frequently, this number isn't considered low. Knowing this and the fact that Antonio Brown is one of the league's most elite receivers, it may be good to play Smith-Schuster opposite of Brown on the line and have them run opposite routes. With that, we'd pass to Smith-Schuster if Brown draws a safety his way into double-coverage, Smith-Schuster would only have to outrun one corner for an open pass.
+
+
+## Containing Matthew Stafford
+
+This graph looks at the players Stafford favors when passing the ball during his plays. We use LOESS to show the average performance of each player given how far Stafford throws. If the regression line is greater than 0, these are the average yards gained that these targets will achieve.
+
+```{r, warning = FALSE, message = FALSE, echo = FALSE, height=1.5}
+# Receivers who have received more than 30 times
+good_receivers = c("A.Abdullah", "D.Fells", "E.Ebron", "G.Tate",
+                   "J.Abbrederis","K.Golladay", "M.Jones","T.Jones", "T.Riddick")
+nfl_lions_stafford <- nfl_lions_stafford %>% filter(Receiver %in% good_receivers)
+ggplot(nfl_lions_stafford, aes(x = AirYards,
+                               y = YardsAfterCatch)) +
+  geom_point(size = 0.5,
+             aes(color = PassOutcome)) +
+  geom_smooth(method = loess, se = FALSE) + 
+  facet_wrap(~Receiver) +
+  labs(x = "Stafford's Throws from line of scrimmage",
+       y = "Yards gained after catch",
+       title = "Yards Gained by Stafford's Favored Targets",
+       color = "Outcome") +
+  tdsc_theme
+```
+
+Stafford overuses Tate and Riddick as his favored targets. Riddick in particular at making significant yards with short or backward passes (passes thrown back from the line of scrimmage). Tate is also a sigificant threat, and has made significant yardage when given the ball. The Steelers should lock these two players down.
+
+
+## Third Down Defense vs. the Lions
+In this section, we want to analyze Detroit's offensive strategy on 3rd downs in order to best prepare for the situation defensively. The figures below analyzes Detroit's play selection and conversion success on 3rd down since 2016.
+
+```{r, warning = FALSE, message = FALSE, echo = FALSE, fig.height=3}
+pbp = mutate(pbp, conversion = ifelse(FirstDown==1, "Conversion", "No Conversion"))
+
+detOff3rdDownPass = subset(pbp, pbp$posteam == "DET"  & down == 3 & PlayType == "Pass")
+detOff3rdDownRun = subset(pbp, pbp$posteam == "DET"  & down == 3 & PlayType == "Run")
+
+passthirdDown = ggplot(detOff3rdDownPass) + geom_histogram(aes(x = ydstogo, fill = PassLength), breaks = seq(0, 20, by = 2)) + facet_wrap(~conversion) + tdsc_theme + coord_cartesian(ylim = c(0, 40)) + labs(title = "DET 3rd Down Passing by Yards to Go and Length of Pass", x = "Yards to Go", y = "Plays", fill = "Length Of Pass")
+
+runthirdDown = ggplot(detOff3rdDownRun) + geom_histogram(aes(x = ydstogo, fill = RunLocation), breaks = seq(0, 20, by = 2)) + facet_wrap(~conversion) + tdsc_theme + labs(title = "DET 3rd Down Rushing by Yards to Go and Location of Run", x = "Yards to Go", y = "Plays", fill = "Location Of Run") + coord_cartesian(ylim = c(0, 40))
+
+#runthirdDown
+#passthirdDown
+
+grid.arrange(runthirdDown, passthirdDown)
+```
+
+Immediately, we can see that Detroit heavily favors passing over rushing on 3rd downs: the only situation where runs are almost as likely is in very short yardage situations with less than 2 yards to go. Tonight, the Steelers should be prepared to defend primarily against short passes on 3rd down, and potentially runs in short yardage situations. They should also be prepared for deep passes in 3rd and long situations, and should aim to keep the Lions in these situations with at least 8 yards to go, as their conversion rate appears to take a steep drop past this mark. 
+
+\newline
+Note: We did not submit any of the below code but it's here for reference
+
+## Toying with Neural Nets
+
+Below is an attempt to classify a run or pass attempt given the down and yards to go. We implemented a single-hidden-layer neural net with two input variables and one hidden variable.
+
+```{r echo=FALSE, message=FALSE, warning=F}
+library(neuralnet)
+pbp = mutate(pbp, conversion = ifelse(FirstDown==1, "Conversion", "No Conversion"))
+detOffData = subset(pbp, posteam == "DET")
+
+detOff3rdDownPass = subset(pbp, pbp$posteam == "DET"  & down == 3 & PlayType == "Pass")
+detOff3rdDownRun = subset(pbp, pbp$posteam == "DET"  & down == 3 & PlayType == "Run")
+
+passthirdDown = ggplot(detOff3rdDownPass) + geom_histogram(aes(x = ydstogo, fill = PassLength), breaks = seq(0, 20, by = 2)) + facet_wrap(~conversion) + tdsc_theme + coord_cartesian(ylim = c(0, 40)) + labs(title = "DET 3rd Down Passing by Yards to Go and Length of Pass", x = "Yards to Go", y = "Plays", fill = "Length Of Pass")
+
+runthirdDown = ggplot(detOff3rdDownRun) + geom_histogram(aes(x = ydstogo, fill = RunLocation), breaks = seq(0, 20, by = 2)) + facet_wrap(~conversion) + tdsc_theme + labs(title = "DET 3rd Down Rushing by Yards to Go and Location of Run", x = "Yards to Go", y = "Plays", fill = "Location Of Run") + coord_cartesian(ylim = c(0, 40))
+
+grid.arrange(runthirdDown, passthirdDown)
+index = sample(nrow(detOffData), round(0.5 * nrow(detOffData)))
+
+trainNN = detOffData[index,]
+testNN = detOffData[-index,]
+
+NN = neuralnet(PassAttempt ~ down + ydstogo, data = filter(trainNN, (!is.na(down) & !is.na(ydstogo))), hidden =   1, linear.output = TRUE)
+
+plot(NN)
+```
+
+## Red Zone Decision Tree
+
+Below, we attempt to analyze the types of plays Detroit executes in the Red zone. Using a decision tree, we can attempt to predict the plays that they will perform given the conditions outlined within the tree.
+
+```{r}
+library(tree)
+library(rpart)
+library(matrixStats)
+# predictors: downs, ydstogo, sp, TimeSecs
+# explanatory: play
+
+# first build redzone cat
+pbp <- mutate(pbp,
+                  inRedZone = ifelse(yrdline100 <= 20, TRUE, FALSE))
+
+nfl_redzone <- pbp %>% filter(inRedZone == TRUE)
+nfl_redzone["Touchdown"] = as.factor(nfl_redzone$Touchdown)
+nfl_redzone["sp"] = as.factor(nfl_redzone$sp)
+
+# Find out how many points pitt scores in red zone
+nfl_redzone_pit = nfl_redzone %>% filter(posteam == "PIT")
+nfl_redzone_det = nfl_redzone %>% filter(posteam == "DET")
+ggplot(nfl_redzone_pit, aes(x = PlayType, y = as.factor(Touchdown))) +
+  geom_mosaic() +
+  mosaic_legend() +
+  theme(axis.text.x=element_text(angle=45, hjust=1)) +
+  tdsc_theme
+
+# Find out how many points lions score in ref zone
+ggplot(nfl_redzone_det, aes(x = PlayType, fill = sp)) +
+  geom_bar(position = "fill") +
+  theme(axis.text.x=element_text(angle=45, hjust=1)) +
+  tdsc_theme
+
+ggplot(nfl_redzone_pit, aes(x = PlayType, fill = sp)) +
+  geom_bar(position = "fill") +
+  theme(axis.text.x=element_text(angle=45, hjust=1)) +
+  tdsc_theme
+
+#touchdown, field goal, miss fg, turnover
+
+
+# Talk about turnovers
+
+tree.mod.pit = rpart(PlayType ~ down + ydstogo + TimeSecs,
+                      data = nfl_redzone_pit)
+
+#printcp(tree.mod.pit)
+plot(tree.mod.pit)
+text(tree.mod.pit)
+
+tree.mod.det = rpart(PlayType ~ down + ydstogo + TimeSecs, data = nfl_redzone_det)
+plot(tree.mod.det, main = "Detroit Plays in Red Zone", compress = TRUE)
+text(tree.mod.det, cex = 0.8)
+```
+
+
+
