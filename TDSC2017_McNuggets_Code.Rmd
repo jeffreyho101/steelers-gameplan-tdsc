@@ -66,7 +66,7 @@ passAgainstDET = ggplot(filter(passPlays, !is.na(PassLength))) + geom_bar(aes(x 
 
 grid.arrange(runsAgainstDET, passAgainstDET, ncol=2)
 ```
-\newline
+
 We can see that Detroit's defense seems to be more stout against runs towards the middle than compared to runs to each side, as they allow by far the least proportion of long runs against runs towards the middle. For tonight's game, the Steelers should favor runs to the left as they historically have the most potential for big plays and the least potential for negative yardage against Detroit.  Tonight, it would not hurt the Steelers to spread the ball around the field or attempt a few deep passes, as teams have had around a 50 percent completion rate for deep balls.
 
 
@@ -92,16 +92,16 @@ Although Bell often runs up the middle, the gains he gets with a guard as the le
 ## Clutch Time
 In the event that we have a close game going into the final minutes of the half or fourth quarter, we want to determine what plays to run and who to feed the ball to. To do this, we first wanted to analyze how "clutch" a given Steelers position player is, so we plotted total win probability added from all carries/receptions against total EPA(expected points added) from targets weighted by each play’s WPA(total win probability added from all targets). It is likely that much of Brown's inherenly increased value in these statistics is due to increased opportunities for receivers to gain greater yardage than a runningback in a spread offense. In addition, in clutch situations, teams often value gaining chunk yardage in short amounts of time. If, on the other hand you're trying to run out the clock to prevent the other team from scoring or having another opportunity on offense, using a RB like Bell may be effective in such situations.
 
-```{r warning=FALSE, message=FALSE, echo=FALSE, fig.height=2, fig.width=7}
+```{r warning=FALSE, message=FALSE, echo=FALSE, fig.height=2}
 team.rush = read.csv("~/Desktop/TDSC_Data/team_season_rushing_df.csv")
 team.rush = subset(team.rush, team.rush$Player_Name == "L.Bell")
 team.rec = read.csv("~/Desktop/TDSC_Data/team_season_receiving_df.csv")
 team.rec = subset(team.rec, team.rec$Team == "PIT")
 
-# ggplot(NULL, aes(x = Total_Clutch_EPA, y=Total_WPA)) + geom_point(data=team.rec, shape=3) + geom_point(data=team.rush) +
-#   labs(title="Total Win Probabilty from all Targets vs. Exp. Points Added per Clutch Play", 
-#        x="Total Clutch EPA", y="Total Win Prob. from All Targets",
-#        subtitle="dot = Le'Veon Bell; + = Antonio Brown")+ tdsc_theme
+ggplot(NULL, aes(x = Total_Clutch_EPA, y=Total_WPA)) + geom_point(data=team.rec, shape=3) + geom_point(data=team.rush) +
+  labs(title="Total Win Probabilty from all Targets vs. Exp. Points Added per Clutch Play",
+       x="Total Clutch EPA", y="Total Win Prob. from All Targets",
+       subtitle="dot = Le'Veon Bell; + = Antonio Brown")+ tdsc_theme
 ```
 
 
@@ -184,8 +184,8 @@ grid.arrange(runthirdDown, passthirdDown)
 
 Immediately, we can see that Detroit heavily favors passing over rushing on 3rd downs: the only situation where runs are almost as likely is in very short yardage situations with less than 2 yards to go. Tonight, the Steelers should be prepared to defend primarily against short passes on 3rd down, and potentially runs in short yardage situations. They should also be prepared for deep passes in 3rd and long situations, and should aim to keep the Lions in these situations with at least 8 yards to go, as their conversion rate appears to take a steep drop past this mark. 
 
-\newline
-Note: We did not submit any of the below code but it's here for reference
+## Reader's Note: 
+We did not submit any of the below code within our three-page report but it's here for reference. Within the six hours we had to investigate data, we played around with basic neural nets and decision trees to see if we could come up with a reasonable predictor within the time span we were alloted. Results were not very significant or robust; however, they are promising, as adding more relevant variables may lead to a better classification of plays to run.
 
 ## Toying with Neural Nets
 
